@@ -102,9 +102,12 @@ export default function Home() {
             if (data.length === 0) {
               setBoolData("Tidak ada data");
             } else {
+              let totalPrev = 0;
               data.map(
                 (res) => (res.date = format(new Date(res.date), "yyyy-MM-dd"))
               );
+              data.map((item) => (totalPrev += Number(item.duration)));
+              setTotal(totalPrev);
               setCallData(data);
               setFilexlsx(data);
             }
