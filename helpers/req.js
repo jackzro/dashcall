@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_URL_SECOND;
+export const API_BASE_URL = process.env.NEXT_PUBLIC_URL;
 
 const createClientAPI = () => {
   const api = axios.create({

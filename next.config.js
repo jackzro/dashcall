@@ -14,8 +14,10 @@ const nextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
-  images: {
-    domains: ["paxhigh.com"],
+  experimental: {
+    images: {
+      unoptimized: true,
+    },
   },
 };
 

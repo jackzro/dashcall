@@ -4,8 +4,9 @@ import { HiDocumentReport } from "react-icons/hi";
 
 export const SIDEBAR_MENUS = [
   { title: "Home", pathname: "/", icon: <AiFillHome /> },
-  { title: "Outline", pathname: "/outline", icon: <AiOutlineBarChart /> },
-  { title: "Did", pathname: "/did", icon: <FcCallback /> },
+  { title: "Month", pathname: "/month", icon: <FcCallback /> },
+  // { title: "Outline", pathname: "/outline", icon: <AiOutlineBarChart /> },
+  // { title: "Did", pathname: "/did", icon: <FcCallback /> },
 ];
 
 export const BANK_MENUS = [

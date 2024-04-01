@@ -71,6 +71,7 @@ function Signin() {
             src={require("../../assets/splash.png")}
             layout="fill"
             objectFit="cover"
+            unoptimized={true}
           />
         </div>
       </div>

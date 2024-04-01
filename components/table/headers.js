@@ -13,6 +13,19 @@ export const Columns = [
   },
 ];
 
+export const ColumnTable = [
+  {
+    Header: "name",
+    accessor: "customers.name",
+    disableFilters: true,
+  },
+  {
+    Header: "Total",
+    accessor: "totalsec",
+    disableFilters: true,
+  },
+];
+
 export const ColumnsBySrc = [
   {
     Header: "Number",

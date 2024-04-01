@@ -3,7 +3,7 @@ import Table from "@components/table";
 import { clients } from "@constants/dropdownMenu";
 import Dashboard from "layout/dashboard";
 import Head from "next/head";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { format } from "date-fns";
 import Datedown from "@components/datedown";
 import {
@@ -16,17 +16,27 @@ import { Columns, ColumnsBySrc } from "@components/table/headers";
 import { formatNumber } from "@helpers/format";
 import TypeFilter from "@components/typeFilter";
 import { AuthContext } from "@context/AuthContext";
+import { useCustomer } from "@services/accumulation";
 import * as xlsx from "xlsx";
+import { useCallDurationgw1 } from "@services/gwsatu";
+import ModalCdrMonth from "@components/modal/ModaCdrMonth";
 
 export default function Home() {
   const { user } = useContext(AuthContext);
   const [client, setClient] = useState("");
+  // const [clientID, setClientID] = useState("");
   const [filexlsx, setFilexlsx] = useState([]);
   const [callData, setCallData] = useState([]);
+  const [boolData, setBoolData] = useState("");
+  const [total, setTotal] = useState(0);
+  const [show, setShow] = useState(false);
+  const { data: customers, isLoading } = useCustomer();
+
   const [type, setType] = useState("Date");
   const { mutate: postCallDuration } = useCallDurationByDate();
   const { mutate: postCallDurationBySrc } = useCallDurationBySource();
   const { mutate: postCallDetail } = useCallDetail();
+  const { mutate: postCallDurationgw1 } = useCallDurationgw1();
   const [state, setState] = useState([
     {
       startDate: new Date(),
@@ -40,47 +50,92 @@ export default function Home() {
   ]);
 
   const handleSubmit = (item) => {
+    setBoolData("");
     setCallData([]);
+    setFilexlsx([]);
     const start_date = format(new Date(item.selection.startDate), "yyyy-MM-dd");
     const end_date = format(new Date(item.selection.endDate), "yyyy-MM-dd");
     setState([item.selection]);
+    if (start_date === end_date) {
+      return;
+    }
+
     if (type === "Date") {
+      if (client === "PayTM") {
+        postCallDurationgw1(
+          {
+            name: client,
+            start_date,
+            end_date,
+          },
+          {
+            onSuccess: async (data) => {
+              if (data.length === 0) {
+                setBoolData("Tidak ada data");
+              } else {
+                let totalPrev = 0;
+                data.map(
+                  (res) => (res.date = format(new Date(res.date), "yyyy-MM-dd"))
+                );
+                data.map((item) => (totalPrev += Number(item.duration)));
+                setTotal(totalPrev);
+                setCallData(data);
+                setFilexlsx(data);
+              }
+            },
+            onError: async (data) => {
+              console.log("erro cok", data);
+            },
+          }
+        );
+        return;
+      }
+
       postCallDuration(
         {
-          name: user.code,
+          name: user.role === "admin" ? client : user.code,
           start_date,
           end_date,
         },
         {
           onSuccess: async (data) => {
-            data.map(
-              (res) => (res.date = format(new Date(res.date), "yyyy-MM-dd"))
-            );
-            setCallData(data);
+            if (data.length === 0) {
+              setBoolData("Tidak ada data");
+            } else {
+              data.map(
+                (res) => (res.date = format(new Date(res.date), "yyyy-MM-dd"))
+              );
+              setCallData(data);
+              setFilexlsx(data);
+            }
           },
           onError: async (data) => {
             console.log(data);
           },
         }
       );
-      postCallDetail(
-        {
-          name: user.code,
-          start_date,
-          end_date,
-        },
-        {
-          onSuccess: async (datas) => {
-            datas.map((data) => {
-              data.calldate = new Date(data.calldate);
-            });
-            setFilexlsx(datas);
-          },
-          onError: async (data) => {
-            console.log(data);
-          },
-        }
-      );
+      // postCallDetail(
+      //   {
+      //     name: user.role === "admin" ? client : user.code,
+      //     start_date,
+      //     end_date,
+      //   },
+      //   {
+      //     onSuccess: async (datas) => {
+      //       if (datas.length === 0) {
+      //         toast.error("Tidak ada data");
+      //       } else {
+      //         datas.map((data) => {
+      //           data.calldate = new Date(data.calldate);
+      //         });
+      //         setFilexlsx(datas);
+      //       }
+      //     },
+      //     onError: async (data) => {
+      //       console.log(data);
+      //     },
+      //   }
+      // );
     } else {
       postCallDurationBySrc(
         {
@@ -90,7 +145,11 @@ export default function Home() {
         },
         {
           onSuccess: async (data) => {
-            setCallData(data);
+            if (data.length === 0) {
+              setBoolData("Tidak ada data");
+            } else {
+              setCallData(data);
+            }
           },
           onError: async (data) => {
             console.log(data);
@@ -110,13 +169,13 @@ export default function Home() {
   const renderTotal = () => {
     let total = 0;
     callData.map((item) => (total += Number(item.duration)));
+
     return (
       <div className="items-center justify-center p-4 mt-6 text-center text-white rounded-lg bg-info">
         <p>Total Duration: {formatNumber(total)}</p>
       </div>
     );
   };
-
   return (
     <Dashboard title="Dashboard">
       <Head>
@@ -124,13 +183,22 @@ export default function Home() {
       </Head>
       <div className="flex items-center justify-around">
         <div className="flex items-center">
-          {/* <Dropdown
-            setClient={setClient}
-            customer={clients}
-            client={client}
-            user={user}
-          /> */}
-          {/* <TypeFilter type={type} setType={setType} /> */}
+          {user !== null && user.role === "admin" && isLoading === false ? (
+            <Dropdown
+              setClient={setClient}
+              customer={customers}
+              client={client}
+              user={user}
+            />
+          ) : (
+            <></>
+          )}
+          {/* {user !== null && user.role === "admin" ? (
+            <TypeFilter type={type} setType={setType} />
+          ) : (
+            <></>
+          )} */}
+
           <Datedown state={state} handleSubmit={handleSubmit} />
 
           {filexlsx.length !== 0 && (
@@ -141,9 +209,18 @@ export default function Home() {
               Generate Excel Detail
             </button>
           )}
+
+          {filexlsx.length !== 0 && (
+            <button
+              className="p-2 mt-4 ml-4 text-xl text-white bg-green-500 rounded-md"
+              onClick={() => setShow(true)}
+            >
+              Save
+            </button>
+          )}
         </div>
 
-        {renderTotal()}
+        {callData.length !== 0 ? renderTotal() : null}
       </div>
 
       {callData.length !== 0 ? (
@@ -151,9 +228,22 @@ export default function Home() {
           callData={callData}
           headers={type === "Date" ? Columns : ColumnsBySrc}
         />
+      ) : boolData === "Tidak ada data" ? (
+        <p className="flex items-center justify-center pt-10 text-2xl text-red-500">
+          {boolData}
+        </p>
       ) : (
         <Loading />
       )}
+
+      {show === true ? (
+        <ModalCdrMonth
+          open={show}
+          onClose={() => setShow(false)}
+          total={total}
+          client={client}
+        ></ModalCdrMonth>
+      ) : null}
     </Dashboard>
   );
 }
@@ -161,14 +251,14 @@ export default function Home() {
 // export const getServerSideProps = async (ctx) => {
 //   const user = JSON.parse(await ctx.req.cookies["nextauth.user"]);
 
-//   // if (!user) {
-//   //   return {
-//   //     redirect: {
-//   //       destination: "/login", //usually the login page
-//   //       permanent: false,
-//   //     },
-//   //   };
-//   // }
+//   if (!user) {
+//     return {
+//       redirect: {
+//         destination: "/login", //usually the login page
+//         permanent: false,
+//       },
+//     };
+//   }
 
 //   return {
 //     props: {

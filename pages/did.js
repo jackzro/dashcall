@@ -8,12 +8,14 @@ import Table from "@components/table";
 import { DidNumber } from "@components/table/headers";
 import Loading from "@components/loading";
 import { AuthContext } from "@context/AuthContext";
+import { useCustomer } from "@services/accumulation";
 
 function Did() {
   const { user } = useContext(AuthContext);
   const [client, setClient] = useState("");
   const [number, setNumber] = useState([]);
   const { mutate: getClientDid, isLoading } = useDidByClient();
+  const { data: customers, isLoading: loadingCustomer } = useCustomer();
 
   const handleSubmit = () => {
     setNumber([]);
@@ -39,12 +41,14 @@ function Did() {
       <div className="flex flex-col">
         <div className="mb-2">
           <label className="mt-2 text-black">Select Client: </label>
-          <Dropdown
-            setClient={setClient}
-            customer={clients}
-            client={client}
-            user={user}
-          />
+          {loadingCustomer === false && customers.length !== 0 ? (
+            <Dropdown
+              setClient={setClient}
+              customer={customers}
+              client={client}
+              user={user}
+            />
+          ) : null}
         </div>
         <button
           className="p-2 text-xl text-white bg-green-500 rounded-xl"

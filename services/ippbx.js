@@ -3,7 +3,6 @@ import request from "@helpers/request";
 import { useContext } from "react";
 
 const getRequest = async (endpoint, params) => {
-  console.log(params);
   try {
     const { data: response } = await request.get(endpoint, { params });
     return response;

@@ -6,7 +6,7 @@ import Loading from "@components/loading";
 import { AuthContext } from "@context/AuthContext";
 
 export const Dashboard = ({ title, children }) => {
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, user } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
@@ -29,7 +29,7 @@ export const Dashboard = ({ title, children }) => {
   return (
     <>
       <div>
-        <Sidebar />
+        <Sidebar role={user.role} />
         {/* <div className="relative md:ml-64 bg-blueGray-100"> */}
         <div className="relative flex min-h-screen bg-white md:ml-64">
           <div className="w-full px-4 pt-8 mx-auto md:px-10">

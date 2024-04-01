@@ -37,6 +37,13 @@ export const getAllCustomer = () => getRequest(`/customer`);
 export const getCustomerById = (body) => getRequest(`/customer/${body.id}`);
 export const getClientById = (id) => getRequest(`/user/client/${id}`);
 
+export const postCdrMonth = (body) => postRequest(`/cdrmonth`, body, false);
+export const usePostCdrMonth = () => useMutation(postCdrMonth);
+
+export const postCdrMonthByMonth = (body) =>
+  postRequest(`/cdrmonth/month`, body, false);
+export const usePostCdrMonthByMonth = () => useMutation(postCdrMonthByMonth);
+
 export const useCustomer = () => useQuery("customer", getAllCustomer);
 export const useCustomerById = () => useMutation(getCustomerById);
 export const useClientById = (id) =>
