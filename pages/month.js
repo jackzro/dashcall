@@ -97,8 +97,6 @@ function Month() {
     return res;
   };
 
-  console.log(dataIndosat);
-
   return (
     <Dashboard title="Month Report">
       <Head>
