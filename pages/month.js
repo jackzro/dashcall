@@ -34,6 +34,7 @@ function Month() {
         onSuccess: (succ) => {
           if (succ.length === 0) {
             setBoolData("Tidak ada data");
+            return;
           }
           let res = {};
           succ.map((data) => {
@@ -47,8 +48,17 @@ function Month() {
             return;
           });
 
-          setDataIndosat(res["Indosat"]);
-          setDataTelkom(res["Telkom"]);
+          if (res["Indosat"].length === 0) {
+            setDataIndosat([]);
+          } else {
+            setDataIndosat(res["Indosat"]);
+          }
+
+          if (res["Telkom"].length === 0) {
+            setDataTelkom([]);
+          } else {
+            setDataTelkom(res["Telkom"]);
+          }
         },
         onError: (err) => {
           console.log(err);
@@ -59,22 +69,35 @@ function Month() {
 
   const renderDataTotal = (data) => {
     let res = 0;
-    data.map((sec) => {
-      res += sec.totalsec;
-    });
-    return res;
+
+    if (data?.length !== undefined) {
+      data.map((sec) => {
+        res += sec.totalsec;
+      });
+      return res;
+    }
+
+    return 0;
   };
 
   const renderTotal = (indosat, telkom) => {
     let res = 0;
-    indosat.map((sec) => {
-      res += sec.totalsec;
-    });
-    telkom.map((sec) => {
-      res += sec.totalsec;
-    });
+
+    if (indosat !== undefined) {
+      indosat.map((sec) => {
+        res += sec.totalsec;
+      });
+    }
+    if (telkom !== undefined) {
+      telkom.map((sec) => {
+        res += sec.totalsec;
+      });
+    }
+
     return res;
   };
+
+  console.log(dataIndosat);
 
   return (
     <Dashboard title="Month Report">
@@ -104,7 +127,7 @@ function Month() {
         </span>
       </div>
 
-      {dataIndosat.length !== 0 && dataTelkom.length !== 0 ? (
+      {dataIndosat?.length !== 0 || dataTelkom?.length !== 0 ? (
         <div className="">
           <div>
             <span className="text-xl text-black">
@@ -112,7 +135,9 @@ function Month() {
                 <span>
                   <label>Telkom : </label>
 
-                  <label>{renderDataTotal(dataTelkom)}</label>
+                  {dataTelkom?.length !== 0 ? (
+                    <label>{renderDataTotal(dataTelkom)}</label>
+                  ) : null}
                 </span>
                 <span>
                   <label>Total : </label>
@@ -121,16 +146,24 @@ function Month() {
               </span>
             </span>
 
-            <Table callData={dataTelkom} headers={ColumnTable} />
+            {dataTelkom?.length !== 0 ? (
+              <Table callData={dataTelkom} headers={ColumnTable} />
+            ) : null}
           </div>
 
           <div>
             <span className="text-xl text-black">
               <label>Indosat : </label>
-              <label>{renderDataTotal(dataIndosat)}</label>
+              <label>
+                {dataIndosat?.length !== 0 ? (
+                  <label>{renderDataTotal(dataIndosat)}</label>
+                ) : null}
+              </label>
             </span>
 
-            <Table callData={dataIndosat} headers={ColumnTable} />
+            {dataIndosat?.length !== 0 ? (
+              <Table callData={dataIndosat} headers={ColumnTable} />
+            ) : null}
           </div>
         </div>
       ) : boolData === "Tidak ada data" ? (
