@@ -22,6 +22,8 @@ function Month() {
   const { mutate: postCdrMonthByMonth } = usePostCdrMonthByMonth();
 
   const handleSubmit = () => {
+    setDataIndosat([]);
+    setDataTelkom([]);
     if (bulan === "" || tahun === "") {
       toast.warn("Bulan atau tahun diisi !!!");
     }
