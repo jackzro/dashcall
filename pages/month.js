@@ -2,6 +2,7 @@ import DropDownBulan from "@components/dropdownbulan";
 import Loading from "@components/loading";
 import Table from "@components/table";
 import { ColumnTable, Columns } from "@components/table/headers";
+import { formatNumber } from "@helpers/format";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { usePostCdrMonthByMonth } from "@services/accumulation";
 import Dashboard from "layout/dashboard";
@@ -134,12 +135,14 @@ function Month() {
                   <label>Telkom : </label>
 
                   {dataTelkom?.length !== 0 ? (
-                    <label>{renderDataTotal(dataTelkom)}</label>
+                    <label>{formatNumber(renderDataTotal(dataTelkom))}</label>
                   ) : null}
                 </span>
                 <span>
                   <label>Total : </label>
-                  <label>{renderTotal(dataIndosat, dataTelkom)}</label>
+                  <label>
+                    {formatNumber(renderTotal(dataIndosat, dataTelkom))}
+                  </label>
                 </span>
               </span>
             </span>
@@ -154,7 +157,7 @@ function Month() {
               <label>Indosat : </label>
               <label>
                 {dataIndosat?.length !== 0 ? (
-                  <label>{renderDataTotal(dataIndosat)}</label>
+                  <label>{formatNumber(renderDataTotal(dataIndosat))}</label>
                 ) : null}
               </label>
             </span>
