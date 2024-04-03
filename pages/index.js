@@ -18,7 +18,7 @@ import TypeFilter from "@components/typeFilter";
 import { AuthContext } from "@context/AuthContext";
 import { useCustomer } from "@services/accumulation";
 import * as xlsx from "xlsx";
-import { useCallDurationgw1 } from "@services/gwsatu";
+import { useCallDurationExotel, useCallDurationgw1 } from "@services/gwsatu";
 import ModalCdrMonth from "@components/modal/ModaCdrMonth";
 
 export default function Home() {
@@ -37,6 +37,7 @@ export default function Home() {
   const { mutate: postCallDurationBySrc } = useCallDurationBySource();
   const { mutate: postCallDetail } = useCallDetail();
   const { mutate: postCallDurationgw1 } = useCallDurationgw1();
+  const { mutate: postCallDurationExotel } = useCallDurationExotel();
   const [state, setState] = useState([
     {
       startDate: new Date(),
@@ -89,34 +90,60 @@ export default function Home() {
           }
         );
         return;
+      } else if (client === "Exotel") {
+        console.log(client);
+        postCallDurationExotel(
+          {
+            name: client,
+            start_date,
+            end_date,
+          },
+          {
+            onSuccess: async (data) => {
+              if (data.length === 0) {
+                setBoolData("Tidak ada data");
+              } else {
+                data.map(
+                  (res) => (res.date = format(new Date(res.date), "yyyy-MM-dd"))
+                );
+                setCallData(data);
+                setFilexlsx(data);
+              }
+            },
+            onError: async (data) => {
+              console.log("erro cok", data);
+            },
+          }
+        );
+      } else {
+        postCallDuration(
+          {
+            name: user.role === "admin" ? client : user.code,
+            start_date,
+            end_date,
+          },
+          {
+            onSuccess: async (data) => {
+              if (data.length === 0) {
+                setBoolData("Tidak ada data");
+              } else {
+                let totalPrev = 0;
+                data.map(
+                  (res) => (res.date = format(new Date(res.date), "yyyy-MM-dd"))
+                );
+                data.map((item) => (totalPrev += Number(item.duration)));
+                setTotal(totalPrev);
+                setCallData(data);
+                setFilexlsx(data);
+              }
+            },
+            onError: async (data) => {
+              console.log(data);
+            },
+          }
+        );
       }
 
-      postCallDuration(
-        {
-          name: user.role === "admin" ? client : user.code,
-          start_date,
-          end_date,
-        },
-        {
-          onSuccess: async (data) => {
-            if (data.length === 0) {
-              setBoolData("Tidak ada data");
-            } else {
-              let totalPrev = 0;
-              data.map(
-                (res) => (res.date = format(new Date(res.date), "yyyy-MM-dd"))
-              );
-              data.map((item) => (totalPrev += Number(item.duration)));
-              setTotal(totalPrev);
-              setCallData(data);
-              setFilexlsx(data);
-            }
-          },
-          onError: async (data) => {
-            console.log(data);
-          },
-        }
-      );
       // postCallDetail(
       //   {
       //     name: user.role === "admin" ? client : user.code,

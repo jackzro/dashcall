@@ -36,4 +36,8 @@ const postRequest = async (
 export const postCallDurationgw1 = (body) =>
   postRequest("/callduration/clientgw1", body, false);
 
+export const postCallDurationExotel = (body) =>
+  postRequest("/callduration/exotel", body, false);
+
 export const useCallDurationgw1 = () => useMutation(postCallDurationgw1);
+export const useCallDurationExotel = () => useMutation(postCallDurationExotel);
